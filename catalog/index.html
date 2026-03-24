@@ -3,88 +3,70 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- ВАЖНО: фикс путей -->
-  <base href="/spring-nfc/catalog/">
-
   <title>Карточка</title>
-
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: #f3f4f6;
     }
-
     .container {
       max-width: 800px;
       margin: auto;
       padding: 15px;
     }
-
     .card {
       background: white;
       padding: 20px;
       border-radius: 14px;
       box-shadow: 0 6px 20px rgba(0,0,0,0.08);
     }
-
     h1 {
       font-size: 26px;
       margin-bottom: 15px;
     }
-
     img {
       width: 100%;
       border-radius: 12px;
       margin-bottom: 15px;
       display: none;
     }
-
     .block {
       margin-top: 15px;
       padding: 12px;
       background: #f9fafb;
       border-radius: 10px;
     }
-
     .block b {
       display: block;
       margin-bottom: 8px;
       font-size: 16px;
     }
-
     ul {
       margin: 0;
       padding-left: 18px;
     }
-
     a {
       color: #0f62fe;
       text-decoration: none;
     }
-
     a:hover {
       text-decoration: underline;
     }
-
     .error {
       color: red;
       font-weight: bold;
+      white-space: pre-line;
     }
   </style>
 </head>
-
 <body>
 <div class="container">
   <div class="card">
-
     <h1 id="title">Загрузка...</h1>
-    <img id="photo">
-
+    <img id="photo" alt="Изображение">
     <div id="content"></div>
     <div id="error" class="error"></div>
-
   </div>
 </div>
 
@@ -92,65 +74,79 @@
 const params = new URLSearchParams(window.location.search);
 const item = params.get("item");
 
+// Жёстко указываем базовый путь репозитория
+const REPO_BASE = "/spring-nfc";
+const CATALOG_BASE = REPO_BASE + "/catalog";
+
+function esc(s) {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 if (!item) {
-  document.getElementById("error").innerText = "Нет параметра item";
+  document.getElementById("error").innerText =
+    "Нет параметра item\nПример: ?item=spring-001";
 } else {
+  const dataUrl = `${CATALOG_BASE}/items/${encodeURIComponent(item)}/data.json?v=${Date.now()}`;
 
-  fetch(`items/${item}/data.json`)
-  .then(res => {
-    if (!res.ok) throw new Error("data.json не найден");
-    return res.json();
-  })
+  fetch(dataUrl, { cache: "no-store" })
+    .then(res => {
+      if (!res.ok) throw new Error("data.json не найден");
+      return res.json();
+    })
+    .then(data => {
+      document.getElementById("title").innerText = data.title || "Карточка";
 
-  .then(data => {
-
-    document.getElementById("title").innerText = data.title || "Карточка";
-
-    if (data.image) {
-      const img = document.getElementById("photo");
-      img.src = `items/${item}/${data.image}`;
-      img.style.display = "block";
-    }
-
-    let html = "";
-
-    (data.sections || []).forEach(section => {
-
-      if (!section.content || section.content.length === 0) return;
-
-      html += `<div class="block"><b>${section.title}</b>`;
-
-      if (section.type === "text") {
-        html += section.content.join("<br>");
+      if (data.image) {
+        const img = document.getElementById("photo");
+        img.src = `${CATALOG_BASE}/items/${encodeURIComponent(item)}/${encodeURIComponent(data.image)}?v=${Date.now()}`;
+        img.style.display = "block";
       }
 
-      if (section.type === "list") {
-        html += "<ul>";
-        section.content.forEach(i => {
-          html += `<li>${i}</li>`;
-        });
-        html += "</ul>";
-      }
+      let html = "";
 
-      if (section.type === "files") {
-        section.content.forEach(f => {
-          html += `<a href="items/${item}/${f.path}" target="_blank">${f.name}</a><br>`;
-        });
-      }
+      (data.sections || []).forEach(section => {
+        if (!section || !section.content || section.content.length === 0) return;
 
-      html += "</div>";
+        html += `<div class="block"><b>${esc(section.title || "")}</b>`;
+
+        if (section.type === "text") {
+          html += section.content.map(x => esc(x)).join("<br>");
+        }
+
+        if (section.type === "list") {
+          html += "<ul>";
+          section.content.forEach(i => {
+            html += `<li>${esc(i)}</li>`;
+          });
+          html += "</ul>";
+        }
+
+        if (section.type === "files") {
+          section.content.forEach(f => {
+            const href = `${CATALOG_BASE}/items/${encodeURIComponent(item)}/${encodeURIComponent(f.path)}?v=${Date.now()}`;
+            html += `<a href="${href}" target="_blank">${esc(f.name)}</a><br>`;
+          });
+        }
+
+        html += "</div>";
+      });
+
+      document.getElementById("content").innerHTML = html || "<div class='block'>Нет данных</div>";
+    })
+    .catch(err => {
+      document.getElementById("title").innerText = "Ошибка";
+      document.getElementById("error").innerText =
+        "Ошибка загрузки: " + err.message +
+        "\n\nПроверь:\n" +
+        "1) catalog/items/" + item + "/data.json\n" +
+        "2) имя файла точно data.json\n" +
+        "3) открываешь правильную ссылку";
     });
-
-    document.getElementById("content").innerHTML = html;
-
-  })
-
-  .catch(err => {
-    document.getElementById("error").innerText = "Ошибка загрузки: " + err.message;
-  });
-
 }
 </script>
-
 </body>
 </html>
