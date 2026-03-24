@@ -74,9 +74,9 @@
 const params = new URLSearchParams(window.location.search);
 const item = params.get("item");
 
-// Жёстко указываем базовый путь репозитория
 const REPO_BASE = "/spring-nfc";
 const CATALOG_BASE = REPO_BASE + "/catalog";
+const ITEMS_BASE = CATALOG_BASE + "/items2";
 
 function esc(s) {
   return String(s ?? "")
@@ -90,7 +90,7 @@ if (!item) {
   document.getElementById("error").innerText =
     "Нет параметра item\nПример: ?item=spring-001";
 } else {
-  const dataUrl = `${CATALOG_BASE}/items/${encodeURIComponent(item)}/data.json?v=${Date.now()}`;
+  const dataUrl = `${ITEMS_BASE}/${encodeURIComponent(item)}/data.json?v=${Date.now()}`;
 
   fetch(dataUrl, { cache: "no-store" })
     .then(res => {
@@ -102,7 +102,7 @@ if (!item) {
 
       if (data.image) {
         const img = document.getElementById("photo");
-        img.src = `${CATALOG_BASE}/items/${encodeURIComponent(item)}/${encodeURIComponent(data.image)}?v=${Date.now()}`;
+        img.src = `${ITEMS_BASE}/${encodeURIComponent(item)}/${encodeURIComponent(data.image)}?v=${Date.now()}`;
         img.style.display = "block";
       }
 
@@ -127,7 +127,7 @@ if (!item) {
 
         if (section.type === "files") {
           section.content.forEach(f => {
-            const href = `${CATALOG_BASE}/items/${encodeURIComponent(item)}/${encodeURIComponent(f.path)}?v=${Date.now()}`;
+            const href = `${ITEMS_BASE}/${encodeURIComponent(item)}/${encodeURIComponent(f.path)}?v=${Date.now()}`;
             html += `<a href="${href}" target="_blank">${esc(f.name)}</a><br>`;
           });
         }
@@ -140,11 +140,7 @@ if (!item) {
     .catch(err => {
       document.getElementById("title").innerText = "Ошибка";
       document.getElementById("error").innerText =
-        "Ошибка загрузки: " + err.message +
-        "\n\nПроверь:\n" +
-        "1) catalog/items/" + item + "/data.json\n" +
-        "2) имя файла точно data.json\n" +
-        "3) открываешь правильную ссылку";
+        "Ошибка загрузки: " + err.message;
     });
 }
 </script>
