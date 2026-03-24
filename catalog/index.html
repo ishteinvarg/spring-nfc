@@ -31,6 +31,25 @@
       margin-bottom: 15px;
       display: none;
     }
+    .lang-switch {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .lang-btn {
+      border: 1px solid #d1d5db;
+      background: white;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .lang-btn.active {
+      background: #0f62fe;
+      color: white;
+      border-color: #0f62fe;
+    }
     .block {
       margin-top: 15px;
       padding: 12px;
@@ -63,6 +82,12 @@
 <body>
 <div class="container">
   <div class="card">
+    <div class="lang-switch">
+      <button class="lang-btn active" data-lang="ru">RU</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="he">HE</button>
+    </div>
+
     <h1 id="title">Загрузка...</h1>
     <img id="photo" alt="Изображение">
     <div id="content"></div>
@@ -78,12 +103,75 @@ const REPO_BASE = "/spring-nfc";
 const CATALOG_BASE = REPO_BASE + "/catalog";
 const ITEMS_BASE = CATALOG_BASE + "/items2";
 
+let currentData = null;
+let currentLang = "ru";
+
 function esc(s) {
   return String(s ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+function getText(value, lang) {
+  if (typeof value === "string") return value;
+  if (value && typeof value === "object") {
+    return value[lang] || value.ru || value.en || value.he || "";
+  }
+  return "";
+}
+
+function getArray(value, lang) {
+  if (Array.isArray(value)) return value;
+  if (value && typeof value === "object") {
+    return value[lang] || value.ru || value.en || value.he || [];
+  }
+  return [];
+}
+
+function renderCard() {
+  if (!currentData) return;
+
+  document.getElementById("title").innerText =
+    getText(currentData.title, currentLang) || "Карточка";
+
+  if (currentData.image) {
+    const img = document.getElementById("photo");
+    img.src = `${ITEMS_BASE}/${encodeURIComponent(item)}/${encodeURIComponent(currentData.image)}?v=${Date.now()}`;
+    img.style.display = "block";
+  }
+
+  let html = "";
+
+  (currentData.sections || []).forEach(section => {
+    if (section.hide === true) return;
+
+    const title = getText(section.title, currentLang);
+    const type = section.type;
+
+    if (type === "text") {
+      const content = getArray(section.content, currentLang);
+      if (!content.length) return;
+      html += `<div class="block"><b>${esc(title)}</b>${content.map(x => esc(x)).join("<br>")}</div>`;
+    }
+
+    if (type === "list") {
+      const content = getArray(section.content, currentLang);
+      if (!content.length) return;
+      html += `<div class="block"><b>${esc(title)}</b><ul>`;
+      content.forEach(i => {
+        html += `<li>${esc(i)}</li>`;
+      });
+      html += `</ul></div>`;
+    }
+  });
+
+  document.getElementById("content").innerHTML = html || "<div class='block'>Нет данных</div>";
+
+  document.querySelectorAll(".lang-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.lang === currentLang);
+  });
 }
 
 if (!item) {
@@ -98,44 +186,8 @@ if (!item) {
       return res.json();
     })
     .then(data => {
-      document.getElementById("title").innerText = data.title || "Карточка";
-
-      if (data.image) {
-        const img = document.getElementById("photo");
-        img.src = `${ITEMS_BASE}/${encodeURIComponent(item)}/${encodeURIComponent(data.image)}?v=${Date.now()}`;
-        img.style.display = "block";
-      }
-
-      let html = "";
-
-      (data.sections || []).forEach(section => {
-        if (!section || !section.content || section.content.length === 0) return;
-
-        html += `<div class="block"><b>${esc(section.title || "")}</b>`;
-
-        if (section.type === "text") {
-          html += section.content.map(x => esc(x)).join("<br>");
-        }
-
-        if (section.type === "list") {
-          html += "<ul>";
-          section.content.forEach(i => {
-            html += `<li>${esc(i)}</li>`;
-          });
-          html += "</ul>";
-        }
-
-        if (section.type === "files") {
-          section.content.forEach(f => {
-            const href = `${ITEMS_BASE}/${encodeURIComponent(item)}/${encodeURIComponent(f.path)}?v=${Date.now()}`;
-            html += `<a href="${href}" target="_blank">${esc(f.name)}</a><br>`;
-          });
-        }
-
-        html += "</div>";
-      });
-
-      document.getElementById("content").innerHTML = html || "<div class='block'>Нет данных</div>";
+      currentData = data;
+      renderCard();
     })
     .catch(err => {
       document.getElementById("title").innerText = "Ошибка";
@@ -143,6 +195,13 @@ if (!item) {
         "Ошибка загрузки: " + err.message;
     });
 }
+
+document.querySelectorAll(".lang-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    currentLang = btn.dataset.lang;
+    renderCard();
+  });
+});
 </script>
 </body>
 </html>
