@@ -1,1 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Карточка изделия</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f3f3f3;
+      color: #222;
+    }
+    .wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 16px;
+      background: #fff;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    h1 {
+      font-size: 30px;
+      margin: 0 0 16px;
+    }
+    .photo {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      display: none;
+    }
+    .block {
+      margin-bottom: 22px;
+    }
+    .block-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .text {
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+    ul {
+      margin: 8px 0 0 18px;
+      padding: 0;
+    }
+    li {
+      margin: 6px 0;
+    }
+    a.file-link {
+      text-decoration: none;
+    }
+    .error {
+      color: #b00020;
+      font-weight: 700;
+      white-space: pre-line;
+    }
+    .muted {
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1 id="title">Загрузка...</h1>
 
+    <img id="photo" class="photo" alt="Фото изделия">
+
+    <div class="block">
+      <div class="block-title">Описание</div>
+      <div id="description" class="text muted">Нет данных</div>
+    </div>
+
+    <div class="block">
+      <div class="block-title">Характеристики</div>
+      <div id="specs" class="text muted">Нет данных</div>
+    </div>
+
+    <div class="block">
+      <div class="block-title">Партия / данные</div>
+      <div id="batch" class="text muted">Нет данных</div>
+    </div>
+
+    <div class="block">
+      <div class="block-title">Документы и файлы</div>
+      <ul id="files" class="muted"></ul>
+    </div>
+
+    <div class="block">
+      <div class="block-title">Контакты</div>
+      <div id="contacts" class="text muted">Нет данных</div>
+    </div>
+
+    <div id="error" class="error" style="display:none;"></div>
+  </div>
+
+  <script>
+    function qs(name) {
+      const p = new URLSearchParams(window.location.search);
+      return p.get(name);
+    }
+
+    function setText(id, value, fallback = "Нет данных") {
+      const el = document.getElementById(id);
+      if (value && String(value).trim()) {
+        el.textContent = value;
+        el.classList.remove("muted");
+      } else {
+        el.textContent = fallback;
+        el.classList.add("muted");
+      }
+    }
+
+    function setMultiline(id, value) {
+      const el = document.getElementById(id);
+      if (Array.isArray(value) && value.length) {
+        el.innerHTML = value.map(v => escapeHtml(String(v))).join("<br>");
+        el.classList.remove("muted");
+      } else if (value && String(value).trim()) {
+        el.textContent = value;
+        el.classList.remove("muted");
+      } else {
+        el.textContent = "Нет данных";
+        el.classList.add("muted");
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    async function loadCard() {
+      const item = qs("item");
+      const errorEl = document.getElementById("error");
+
+      if (!item) {
+        errorEl.style.display = "block";
+        errorEl.textContent =
+          "Не указан товар.\nПример ссылки:\n?item=spring-001";
+        document.getElementById("title").textContent = "Карточка изделия";
+        return;
+      }
+
+      const base = `items/${encodeURIComponent(item)}/`;
+      const url = `${base}data.json`;
+
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) {
+          throw new Error("Не удалось загрузить data.json");
+        }
+
+        const data = await res.json();
+
+        setText("title", data.title || "Карточка изделия", "Карточка изделия");
+        setMultiline("description", data.description);
+        setMultiline("specs", data.specs);
+        setMultiline("batch", data.batch);
+        setMultiline("contacts", data.contacts);
+
+        const photo = document.getElementById("photo");
+        if (data.image) {
+          photo.src = base + data.image;
+          photo.style.display = "block";
+        }
+
+        const filesEl = document.getElementById("files");
+        filesEl.innerHTML = "";
+
+        if (Array.isArray(data.files) && data.files.length) {
+          filesEl.classList.remove("muted");
+
+          data.files.forEach(file => {
+            const li = document.createElement("li");
+            const a = document.createElement("a");
+
+            a.href = base + file.path;
+            a.textContent = file.name || file.path;
+            a.target = "_blank";
+            a.rel = "noopener";
+            a.className = "file-link";
+
+            li.appendChild(a);
+            filesEl.appendChild(li);
+          });
+        } else {
+          filesEl.classList.add("muted");
+          filesEl.innerHTML = "<li>Нет файлов</li>";
+        }
+      } catch (err) {
+        errorEl.style.display = "block";
+        errorEl.textContent =
+          "Ошибка загрузки карточки.\nПроверь папку товара и файл data.json";
+        document.getElementById("title").textContent = "Ошибка";
+      }
+    }
+
+    loadCard();
+  </script>
+</body>
+</html>
