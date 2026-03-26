@@ -31,25 +31,6 @@
       margin-bottom: 15px;
       display: none;
     }
-    .lang-switch {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-    .lang-btn {
-      border: 1px solid #d1d5db;
-      background: white;
-      border-radius: 8px;
-      padding: 8px 12px;
-      cursor: pointer;
-      font-weight: 700;
-    }
-    .lang-btn.active {
-      background: #0f62fe;
-      color: white;
-      border-color: #0f62fe;
-    }
     .block {
       margin-top: 15px;
       padding: 12px;
@@ -65,9 +46,17 @@
       margin: 0;
       padding-left: 18px;
     }
+    .link-list {
+      margin: 0;
+      padding-left: 18px;
+    }
+    .link-list li {
+      margin: 0 0 6px 0;
+    }
     a {
       color: #0f62fe;
       text-decoration: none;
+      word-break: break-word;
     }
     a:hover {
       text-decoration: underline;
@@ -82,12 +71,6 @@
 <body>
 <div class="container">
   <div class="card">
-    <div class="lang-switch">
-      <button class="lang-btn active" data-lang="ru">RU</button>
-      <button class="lang-btn" data-lang="en">EN</button>
-      <button class="lang-btn" data-lang="he">HE</button>
-    </div>
-
     <h1 id="title">Загрузка...</h1>
     <img id="photo" alt="Изображение">
     <div id="content"></div>
@@ -104,7 +87,6 @@ const CATALOG_BASE = REPO_BASE + "/catalog";
 const ITEMS_BASE = CATALOG_BASE + "/items2";
 
 let currentData = null;
-let currentLang = "ru";
 
 function esc(s) {
   return String(s ?? "")
@@ -114,32 +96,92 @@ function esc(s) {
     .replace(/"/g, "&quot;");
 }
 
-function getText(value, lang) {
+function getText(value) {
   if (typeof value === "string") return value;
   if (value && typeof value === "object") {
-    return value[lang] || value.ru || value.en || value.he || "";
+    return value.ru || value.en || value.he || "";
   }
   return "";
 }
 
-function getArray(value, lang) {
+function getArray(value) {
   if (Array.isArray(value)) return value;
   if (value && typeof value === "object") {
-    return value[lang] || value.ru || value.en || value.he || [];
+    return value.ru || value.en || value.he || [];
   }
   return [];
+}
+
+function normalizeHref(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  if (raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("mailto:") || raw.startsWith("tel:")) {
+    return raw;
+  }
+  return "https://" + raw;
+}
+
+function renderTextBlock(title, content) {
+  if (!content.length) return "";
+  return `<div class="block"><b>${esc(title)}</b>${content.map(x => esc(x)).join("<br>")}</div>`;
+}
+
+function renderListBlock(title, content) {
+  if (!content.length) return "";
+  let html = `<div class="block"><b>${esc(title)}</b><ul>`;
+  content.forEach(i => {
+    html += `<li>${esc(i)}</li>`;
+  });
+  html += `</ul></div>`;
+  return html;
+}
+
+function renderLinksBlock(title, content) {
+  if (!content.length) return "";
+  let html = `<div class="block"><b>${esc(title)}</b><ul class="link-list">`;
+  content.forEach(i => {
+    const label = esc(i.label || "");
+    const text = esc(i.text || "");
+    const href = normalizeHref(i.href || "");
+    const line = label ? `${label}: ${text}` : text;
+    if (href) {
+      html += `<li><a href="${esc(href)}" target="_blank" rel="noopener noreferrer">${line}</a></li>`;
+    } else {
+      html += `<li>${line}</li>`;
+    }
+  });
+  html += `</ul></div>`;
+  return html;
+}
+
+function renderFilesBlock(title, content) {
+  if (!content.length) return "";
+  let html = `<div class="block"><b>${esc(title)}</b><ul class="link-list">`;
+  content.forEach(file => {
+    const name = esc(file.name || file.path || "Файл");
+    const path = file.path ? `${ITEMS_BASE}/${encodeURIComponent(item)}/${encodeURIComponent(file.path)}` : "";
+    if (path) {
+      html += `<li><a href="${path}" target="_blank" rel="noopener noreferrer">${name}</a></li>`;
+    } else {
+      html += `<li>${name}</li>`;
+    }
+  });
+  html += `</ul></div>`;
+  return html;
 }
 
 function renderCard() {
   if (!currentData) return;
 
-  document.getElementById("title").innerText =
-    getText(currentData.title, currentLang) || "Карточка";
+  document.getElementById("title").innerText = getText(currentData.title) || "Карточка";
 
+  const img = document.getElementById("photo");
   if (currentData.image) {
-    const img = document.getElementById("photo");
     img.src = `${ITEMS_BASE}/${encodeURIComponent(item)}/${encodeURIComponent(currentData.image)}?v=${Date.now()}`;
     img.style.display = "block";
+  } else {
+    img.removeAttribute("src");
+    img.style.display = "none";
   }
 
   let html = "";
@@ -147,31 +189,22 @@ function renderCard() {
   (currentData.sections || []).forEach(section => {
     if (section.hide === true) return;
 
-    const title = getText(section.title, currentLang);
+    const title = getText(section.title);
     const type = section.type;
+    const content = getArray(section.content);
 
     if (type === "text") {
-      const content = getArray(section.content, currentLang);
-      if (!content.length) return;
-      html += `<div class="block"><b>${esc(title)}</b>${content.map(x => esc(x)).join("<br>")}</div>`;
-    }
-
-    if (type === "list") {
-      const content = getArray(section.content, currentLang);
-      if (!content.length) return;
-      html += `<div class="block"><b>${esc(title)}</b><ul>`;
-      content.forEach(i => {
-        html += `<li>${esc(i)}</li>`;
-      });
-      html += `</ul></div>`;
+      html += renderTextBlock(title, content);
+    } else if (type === "list") {
+      html += renderListBlock(title, content);
+    } else if (type === "links") {
+      html += renderLinksBlock(title, content);
+    } else if (type === "files") {
+      html += renderFilesBlock(title, content);
     }
   });
 
   document.getElementById("content").innerHTML = html || "<div class='block'>Нет данных</div>";
-
-  document.querySelectorAll(".lang-btn").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.lang === currentLang);
-  });
 }
 
 if (!item) {
@@ -195,13 +228,6 @@ if (!item) {
         "Ошибка загрузки: " + err.message;
     });
 }
-
-document.querySelectorAll(".lang-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    currentLang = btn.dataset.lang;
-    renderCard();
-  });
-});
 </script>
 </body>
 </html>
