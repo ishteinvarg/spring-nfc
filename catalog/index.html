@@ -154,21 +154,6 @@ function renderLinksBlock(title, content) {
   return html;
 }
 
-function renderFilesBlock(title, content) {
-  if (!content.length) return "";
-  let html = `<div class="block"><b>${esc(title)}</b><ul class="link-list">`;
-  content.forEach(file => {
-    const name = esc(file.name || file.path || "Файл");
-    const path = file.path ? `${ITEMS_BASE}/${encodeURIComponent(item)}/${encodeURIComponent(file.path)}` : "";
-    if (path) {
-      html += `<li><a href="${path}" target="_blank" rel="noopener noreferrer">${name}</a></li>`;
-    } else {
-      html += `<li>${name}</li>`;
-    }
-  });
-  html += `</ul></div>`;
-  return html;
-}
 
 function renderCard() {
   if (!currentData) return;
@@ -199,8 +184,6 @@ function renderCard() {
       html += renderListBlock(title, content);
     } else if (type === "links") {
       html += renderLinksBlock(title, content);
-    } else if (type === "files") {
-      html += renderFilesBlock(title, content);
     }
   });
 
