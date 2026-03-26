@@ -1,0 +1,36 @@
+{
+  "title": "Igor Steinvarg",
+  "image": "DSCN0207_optimized.jpg",
+  "sections": [
+    {
+      "type": "links",
+      "title": "Контакты",
+      "content": [
+        {
+          "kind": "email",
+          "label": "Email",
+          "text": "ishteinvarg@gmail.com",
+          "href": "mailto:ishteinvarg@gmail.com"
+        },
+        {
+          "kind": "whatsapp",
+          "label": "WhatsApp",
+          "text": "0553162024",
+          "href": "https://wa.me/0553162024"
+        }
+      ]
+    },
+    {
+      "type": "files",
+      "title": "Файлы",
+      "content": [
+        {
+          "name": "3264089.pdf",
+          "path": "3264089.pdf",
+          "type": "pdf",
+          "preview": "3264089_preview.png"
+        }
+      ]
+    }
+  ]
+}
