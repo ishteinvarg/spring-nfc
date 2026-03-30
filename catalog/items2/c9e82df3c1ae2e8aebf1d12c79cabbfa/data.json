@@ -1,0 +1,44 @@
+{
+  "title": "",
+  "public_token": "c9e82df3c1ae2e8aebf1d12c79cabbfa",
+  "image": "1678000087137_optimized.jpg",
+  "sections": [
+    {
+      "type": "text",
+      "title": "Описание",
+      "content": [
+        "[File: Igor_.docx]",
+        "IGOR SHTEINVAR(G)",
+        "Engineer / Technical Specialist",
+        "Israel",
+        "PROFESSIONAL SUMMARY",
+        "Engineer with a classical technical education and extensive hands‑on experience in hardware systems, network infrastructure, industrial equipment, and complex technical troubleshooting. Strong analytical mindset, systematic approach, and proven root cause analysis skills.",
+        "Currently expanding professional expertise through QA testing studies and applied neural network training.",
+        "CORE SKILLS",
+        "• Hardware and software troubleshooting",
+        "• Network infrastructure and technologies",
+        "• Industrial and measuring equipment",
+        "• Technical documentation analysis",
+        "• Root cause analysis",
+        "• Windows and Linux systems"
+      ]
+    },
+    {
+      "type": "files",
+      "title": "Файлы",
+      "content": [
+        {
+          "name": "Igor_.docx",
+          "path": "Igor_.docx",
+          "type": "docx"
+        },
+        {
+          "name": "3264089.pdf",
+          "path": "3264089.pdf",
+          "type": "pdf",
+          "preview": "3264089_preview.png"
+        }
+      ]
+    }
+  ]
+}
