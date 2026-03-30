@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Карточка</title>
+  <title>Card</title>
   <style>
     body {
       margin: 0;
@@ -158,7 +158,7 @@ function renderFilesBlock(title, content) {
   if (!content.length) return "";
   let html = `<div class="block"><b>${esc(title)}</b><ul class="link-list">`;
   content.forEach(file => {
-    const name = esc(file.name || file.path || "Файл");
+    const name = esc(file.name || file.path || "File");
     const path = file.path ? `${ITEMS_BASE}/${encodeURIComponent(item)}/${encodeURIComponent(file.path)}` : "";
     if (path) {
       html += `<li><a href="${path}" target="_blank" rel="noopener noreferrer">${name}</a></li>`;
@@ -173,7 +173,7 @@ function renderFilesBlock(title, content) {
 function renderCard() {
   if (!currentData) return;
 
-  document.getElementById("title").innerText = getText(currentData.title) || "Карточка";
+  document.getElementById("title").innerText = getText(currentData.title) || "Card";
 
   const img = document.getElementById("photo");
   if (currentData.image) {
@@ -189,33 +189,47 @@ function renderCard() {
   (currentData.sections || []).forEach(section => {
     if (section.hide === true) return;
 
-    const title = getText(section.title);
+    let title = getText(section.title);
     const type = section.type;
     const content = getArray(section.content);
 
     if (type === "text") {
+      title = "Description";
       html += renderTextBlock(title, content);
     } else if (type === "list") {
-      html += renderListBlock(title, content);
+      html += renderListBlock(title || "List", content);
     } else if (type === "links") {
-      html += renderLinksBlock(title, content);
+      title = "Contacts";
+      const normalizedContent = content.map(i => ({
+        ...i,
+        label:
+          i.kind === "phone" ? "Phone" :
+          i.kind === "email" ? "Email" :
+          i.kind === "whatsapp" ? "WhatsApp" :
+          i.kind === "website" ? "Website" :
+          (i.label === "Телефон" ? "Phone" :
+           i.label === "Сайт" ? "Website" :
+           i.label || "")
+      }));
+      html += renderLinksBlock(title, normalizedContent);
     } else if (type === "files") {
+      title = "Files";
       html += renderFilesBlock(title, content);
     }
   });
 
-  document.getElementById("content").innerHTML = html || "<div class='block'>Нет данных</div>";
+  document.getElementById("content").innerHTML = html || "<div class='block'>No data</div>";
 }
 
 if (!item) {
   document.getElementById("error").innerText =
-    "Нет параметра item\nПример: ?item=spring-001";
+    "Missing item parameter\nExample: ?item=spring-001";
 } else {
   const dataUrl = `${ITEMS_BASE}/${encodeURIComponent(item)}/data.json?v=${Date.now()}`;
 
   fetch(dataUrl, { cache: "no-store" })
     .then(res => {
-      if (!res.ok) throw new Error("data.json не найден");
+      if (!res.ok) throw new Error("data.json not found");
       return res.json();
     })
     .then(data => {
@@ -223,9 +237,9 @@ if (!item) {
       renderCard();
     })
     .catch(err => {
-      document.getElementById("title").innerText = "Ошибка";
+      document.getElementById("title").innerText = "Error";
       document.getElementById("error").innerText =
-        "Ошибка загрузки: " + err.message;
+        "Loading error: " + err.message;
     });
 }
 </script>
