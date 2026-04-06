@@ -1,0 +1,19 @@
+{
+  "title": "Это мы",
+  "public_token": "f01e7c1d2e02c31fa1edb1ffafc6af9d",
+  "image": "WhatsApp Image 2026-04-05 at 21.34.15 (1)_optimized.jpg",
+  "sections": [
+    {
+      "type": "files",
+      "title": "Файлы",
+      "content": [
+        {
+          "name": "3264089.pdf",
+          "path": "3264089.pdf",
+          "type": "pdf",
+          "preview": "3264089_preview.png"
+        }
+      ]
+    }
+  ]
+}
