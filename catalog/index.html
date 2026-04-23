@@ -86,39 +86,6 @@
       color: #374151;
       word-break: break-word;
     }
-    .status-banner {
-      display: none;
-      margin-bottom: 15px;
-      padding: 12px 14px;
-      border-radius: 12px;
-      font-weight: bold;
-      border: 1px solid transparent;
-      line-height: 1.35;
-    }
-    .status-active {
-      display: block;
-      background: #ecfdf5;
-      color: #065f46;
-      border-color: #a7f3d0;
-    }
-    .status-suspended {
-      display: block;
-      background: #fffbeb;
-      color: #92400e;
-      border-color: #fde68a;
-    }
-    .status-archived {
-      display: block;
-      background: #f3f4f6;
-      color: #374151;
-      border-color: #d1d5db;
-    }
-    .status-replaced {
-      display: block;
-      background: #fef2f2;
-      color: #991b1b;
-      border-color: #fecaca;
-    }
     @media (min-width: 640px) {
       .passport-grid {
         grid-template-columns: 1fr 1fr;
@@ -138,7 +105,6 @@
 <body>
 <div class="container">
   <div class="card">
-    <div id="statusBanner" class="status-banner"></div>
     <h1 id="title">Loading...</h1>
     <img id="photo" alt="Image">
     <div id="content"></div>
@@ -187,60 +153,6 @@ function normalizeHref(value) {
     return raw;
   }
   return "https://" + raw;
-}
-
-function getPassportMeta(data) {
-  if (data && typeof data.passport_meta === "object" && data.passport_meta) {
-    return data.passport_meta;
-  }
-  return data || {};
-}
-
-function getPublicCard(data) {
-  if (data && typeof data.public_card === "object" && data.public_card) {
-    return data.public_card;
-  }
-  return data || {};
-}
-
-function statusLabel(code) {
-  const map = {
-    active: "Active",
-    suspended: "Suspended",
-    archived: "Archived",
-    replaced: "Replaced"
-  };
-  return map[(code || "").toLowerCase()] || "";
-}
-
-function statusMessage(code) {
-  const map = {
-    active: "This passport is active.",
-    suspended: "This passport is currently suspended.",
-    archived: "This passport is archived.",
-    replaced: "This passport has been replaced."
-  };
-  return map[(code || "").toLowerCase()] || "";
-}
-
-function renderStatusBanner(meta) {
-  const banner = document.getElementById("statusBanner");
-  const code = String(meta.status || "").trim().toLowerCase();
-  banner.className = "status-banner";
-  banner.textContent = "";
-  if (!code) {
-    banner.style.display = "none";
-    return;
-  }
-  const label = statusLabel(code);
-  const message = statusMessage(code);
-  if (!label) {
-    banner.style.display = "none";
-    return;
-  }
-  banner.classList.add("status-" + code);
-  banner.textContent = message ? `${label} · ${message}` : label;
-  banner.style.display = "block";
 }
 
 function renderTextBlock(title, content) {
@@ -296,23 +208,23 @@ function hasValue(v) {
   return !(v === undefined || v === null || String(v).trim() === "");
 }
 
-function passportEntries(meta, publicCard, fallbackData) {
+function passportEntries(data) {
   return [
-    ["Internal ID", meta.internal_id],
-    ["Passport Type", meta.passport_type],
-    ["Status", meta.status],
-    ["Version", meta.version],
-    ["Product Name", meta.product_name || publicCard.title || fallbackData.title],
-    ["Batch ID", meta.batch_id],
-    ["Serial ID", meta.serial_id],
-    ["Verification Code", meta.verification_code],
-    ["Created At", meta.created_at],
-    ["Updated At", meta.updated_at]
+    ["Internal ID", data.internal_id],
+    ["Passport Type", data.passport_type],
+    ["Status", data.status],
+    ["Version", data.version],
+    ["Product Name", data.product_name || data.title],
+    ["Batch ID", data.batch_id],
+    ["Serial ID", data.serial_id],
+    ["Verification Code", data.verification_code],
+    ["Created At", data.created_at],
+    ["Updated At", data.updated_at]
   ].filter(([_, value]) => hasValue(value));
 }
 
-function renderPassportBlock(meta, publicCard, fallbackData) {
-  const entries = passportEntries(meta, publicCard, fallbackData);
+function renderPassportBlock(data) {
+  const entries = passportEntries(data);
   if (!entries.length) return "";
   let html = `<div class="block"><b>Product Passport</b><div class="passport-grid">`;
   entries.forEach(([label, value]) => {
@@ -325,18 +237,11 @@ function renderPassportBlock(meta, publicCard, fallbackData) {
 function renderCard() {
   if (!currentData) return;
 
-  const meta = getPassportMeta(currentData);
-  const publicCard = getPublicCard(currentData);
-
-  document.getElementById("title").innerText =
-    getText(meta.product_name) || getText(publicCard.title) || getText(currentData.title) || "Product Passport";
-
-  renderStatusBanner(meta);
+  document.getElementById("title").innerText = getText(currentData.product_name) || getText(currentData.title) || "Product Passport";
 
   const img = document.getElementById("photo");
-  const imageName = publicCard.image || currentData.image;
-  if (imageName) {
-    img.src = `${ITEMS_BASE}/${encodeURIComponent(item)}/${encodeURIComponent(imageName)}?v=${Date.now()}`;
+  if (currentData.image) {
+    img.src = `${ITEMS_BASE}/${encodeURIComponent(item)}/${encodeURIComponent(currentData.image)}?v=${Date.now()}`;
     img.style.display = "block";
   } else {
     img.removeAttribute("src");
@@ -344,9 +249,9 @@ function renderCard() {
   }
 
   let html = "";
-  html += renderPassportBlock(meta, publicCard, currentData);
+  html += renderPassportBlock(currentData);
 
-  (publicCard.sections || currentData.sections || []).forEach(section => {
+  (currentData.sections || []).forEach(section => {
     if (section.hide === true) return;
 
     let title = getText(section.title);
@@ -383,8 +288,7 @@ function renderCard() {
 
 if (!item) {
   document.getElementById("error").innerText =
-    "Missing item parameter
-Example: ?item=spring-001";
+    "Missing item parameter\nExample: ?item=spring-001";
 } else {
   const dataUrl = `${ITEMS_BASE}/${encodeURIComponent(item)}/data.json?v=${Date.now()}`;
 
