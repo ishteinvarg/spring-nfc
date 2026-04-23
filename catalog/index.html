@@ -69,6 +69,7 @@
     .passport-block {
       padding: 10px 12px;
       background: #f6f7f9;
+      margin-top: 18px;
     }
     .passport-block b {
       font-size: 13px;
@@ -252,7 +253,6 @@ function renderCard() {
   }
 
   let html = "";
-  html += renderPassportBlock(currentData);
 
   (currentData.sections || []).forEach(section => {
     if (section.hide === true) return;
@@ -285,6 +285,8 @@ function renderCard() {
       html += renderFilesBlock(title, content);
     }
   });
+
+  html += renderPassportBlock(currentData);
 
   document.getElementById("content").innerHTML = html || "<div class='block'>No data</div>";
 }
