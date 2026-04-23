@@ -1,456 +1,408 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Digital Product Passport</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Passport</title>
   <style>
-    :root{
-      --bg:#f3f4f6;
-      --card:#ffffff;
-      --text:#111827;
-      --muted:#6b7280;
-      --line:#e5e7eb;
-      --link:#2563eb;
-
-      --active-bg:#ecfdf5;
-      --active-fg:#065f46;
-      --active-bd:#a7f3d0;
-
-      --suspended-bg:#fffbeb;
-      --suspended-fg:#92400e;
-      --suspended-bd:#fde68a;
-
-      --archived-bg:#f3f4f6;
-      --archived-fg:#374151;
-      --archived-bd:#d1d5db;
-
-      --replaced-bg:#fef2f2;
-      --replaced-fg:#991b1b;
-      --replaced-bd:#fecaca;
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
     }
-
-    * { box-sizing: border-box; }
-    body{
-      margin:0;
-      font-family: Arial, Helvetica, sans-serif;
-      background:var(--bg);
-      color:var(--text);
+    .container {
+      max-width: 800px;
+      margin: auto;
+      padding: 15px;
     }
-    .wrap{
-      max-width: 920px;
-      margin: 24px auto;
-      padding: 0 16px 48px;
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 14px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
     }
-    .card{
-      background:var(--card);
-      border-radius:18px;
-      box-shadow:0 8px 24px rgba(0,0,0,.08);
-      overflow:hidden;
-      border:1px solid #eef0f3;
+    h1 {
+      font-size: 26px;
+      margin-bottom: 15px;
     }
-    .header{
-      padding:22px 22px 10px;
+    img {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      display: none;
     }
-    .status-banner{
-      display:none;
-      margin-bottom:14px;
-      padding:12px 14px;
-      border-radius:12px;
-      font-weight:700;
-      font-size:15px;
-      border:1px solid var(--line);
+    .block {
+      margin-top: 15px;
+      padding: 12px;
+      background: #f9fafb;
+      border-radius: 10px;
     }
-    .status-banner.active{
-      display:block;
-      background:var(--active-bg);
-      color:var(--active-fg);
-      border-color:var(--active-bd);
+    .block b {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 16px;
     }
-    .status-banner.suspended{
-      display:block;
-      background:var(--suspended-bg);
-      color:var(--suspended-fg);
-      border-color:var(--suspended-bd);
+    ul {
+      margin: 0;
+      padding-left: 18px;
     }
-    .status-banner.archived{
-      display:block;
-      background:var(--archived-bg);
-      color:var(--archived-fg);
-      border-color:var(--archived-bd);
+    .link-list {
+      margin: 0;
+      padding-left: 18px;
     }
-    .status-banner.replaced{
-      display:block;
-      background:var(--replaced-bg);
-      color:var(--replaced-fg);
-      border-color:var(--replaced-bd);
+    .link-list li {
+      margin: 0 0 6px 0;
     }
-    h1{
-      margin:0;
-      font-size:30px;
-      line-height:1.2;
+    a {
+      color: #0f62fe;
+      text-decoration: none;
+      word-break: break-word;
     }
-    .passport-meta{
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap:10px 12px;
-      margin-top:16px;
-      padding:14px;
-      background:#f9fafb;
-      border:1px solid var(--line);
-      border-radius:14px;
+    a:hover {
+      text-decoration: underline;
     }
-    .meta-row{
-      min-height:32px;
+    .error {
+      color: red;
+      font-weight: bold;
+      white-space: pre-line;
     }
-    .meta-label{
-      display:block;
-      font-size:12px;
-      color:var(--muted);
-      margin-bottom:4px;
-      text-transform:uppercase;
-      letter-spacing:.04em;
+    .passport-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
     }
-    .meta-value{
-      font-size:15px;
-      font-weight:600;
-      color:var(--text);
-      word-break:break-word;
+    .passport-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      line-height: 1.35;
     }
-    .photo-wrap{
-      padding:0 22px 10px;
+    .passport-label {
+      min-width: 150px;
+      font-weight: bold;
+      color: #111827;
     }
-    #photo{
-      width:100%;
-      max-height:460px;
-      object-fit:contain;
-      background:#f3f4f6;
-      border-radius:14px;
-      display:none;
+    .passport-value {
+      color: #374151;
+      word-break: break-word;
     }
-    .content{
-      padding: 0 22px 22px;
+    .status-banner {
+      display: none;
+      margin-bottom: 15px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-weight: bold;
+      border: 1px solid transparent;
+      line-height: 1.35;
     }
-    .block{
-      margin-top:16px;
-      padding:16px;
-      background:#fafafa;
-      border:1px solid var(--line);
-      border-radius:14px;
+    .status-active {
+      display: block;
+      background: #ecfdf5;
+      color: #065f46;
+      border-color: #a7f3d0;
     }
-    .block-title{
-      font-size:18px;
-      font-weight:700;
-      margin:0 0 10px;
+    .status-suspended {
+      display: block;
+      background: #fffbeb;
+      color: #92400e;
+      border-color: #fde68a;
     }
-    .text-lines{
-      white-space:pre-wrap;
-      line-height:1.55;
+    .status-archived {
+      display: block;
+      background: #f3f4f6;
+      color: #374151;
+      border-color: #d1d5db;
     }
-    .link-list, .plain-list{
-      margin:0;
-      padding-left:20px;
+    .status-replaced {
+      display: block;
+      background: #fef2f2;
+      color: #991b1b;
+      border-color: #fecaca;
     }
-    .link-list li, .plain-list li{
-      margin:8px 0;
-      line-height:1.45;
-    }
-    a{
-      color:var(--link);
-      text-decoration:none;
-    }
-    a:hover{
-      text-decoration:underline;
-    }
-    #error{
-      color:#b91c1c;
-      font-size:15px;
-      margin-top:14px;
-      white-space:pre-wrap;
-    }
-    .empty{
-      color:var(--muted);
-    }
-    @media (max-width: 720px){
-      .wrap{ margin:12px auto; padding:0 10px 28px; }
-      .header, .content, .photo-wrap{ padding-left:14px; padding-right:14px; }
-      .passport-meta{ grid-template-columns:1fr; }
-      h1{ font-size:24px; }
+    @media (min-width: 640px) {
+      .passport-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 18px;
+      }
+      .passport-row {
+        display: block;
+      }
+      .passport-label {
+        display: block;
+        min-width: 0;
+        margin-bottom: 2px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <div class="header">
-        <div id="statusBanner" class="status-banner"></div>
-        <h1 id="title">Loading...</h1>
-
-        <div id="passportMeta" class="passport-meta" style="display:none;">
-          <div class="meta-row"><span class="meta-label">Status</span><span id="metaStatus" class="meta-value"></span></div>
-          <div class="meta-row"><span class="meta-label">Version</span><span id="metaVersion" class="meta-value"></span></div>
-          <div class="meta-row"><span class="meta-label">Batch ID</span><span id="metaBatch" class="meta-value"></span></div>
-          <div class="meta-row"><span class="meta-label">Serial ID</span><span id="metaSerial" class="meta-value"></span></div>
-          <div class="meta-row"><span class="meta-label">Verification Code</span><span id="metaVerification" class="meta-value"></span></div>
-          <div class="meta-row"><span class="meta-label">Updated</span><span id="metaUpdated" class="meta-value"></span></div>
-        </div>
-      </div>
-
-      <div class="photo-wrap">
-        <img id="photo" alt="Product image" />
-      </div>
-
-      <div id="content" class="content"></div>
-    </div>
-
-    <div id="error"></div>
+<div class="container">
+  <div class="card">
+    <div id="statusBanner" class="status-banner"></div>
+    <h1 id="title">Loading...</h1>
+    <img id="photo" alt="Image">
+    <div id="content"></div>
+    <div id="error" class="error"></div>
   </div>
+</div>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const item = params.get("item");
-    const ITEMS_BASE = "items2";
-    let currentData = null;
+<script>
+const params = new URLSearchParams(window.location.search);
+const item = params.get("item");
 
-    function esc(v) {
-      return String(v ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
+const REPO_BASE = "/spring-nfc";
+const CATALOG_BASE = REPO_BASE + "/catalog";
+const ITEMS_BASE = CATALOG_BASE + "/items2";
+
+let currentData = null;
+
+function esc(s) {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function getText(value) {
+  if (typeof value === "string") return value;
+  if (value && typeof value === "object") {
+    return value.ru || value.en || value.he || "";
+  }
+  return "";
+}
+
+function getArray(value) {
+  if (Array.isArray(value)) return value;
+  if (value && typeof value === "object") {
+    return value.ru || value.en || value.he || [];
+  }
+  return [];
+}
+
+function normalizeHref(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  if (raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("mailto:") || raw.startsWith("tel:")) {
+    return raw;
+  }
+  return "https://" + raw;
+}
+
+function getPassportMeta(data) {
+  if (data && typeof data.passport_meta === "object" && data.passport_meta) {
+    return data.passport_meta;
+  }
+  return data || {};
+}
+
+function getPublicCard(data) {
+  if (data && typeof data.public_card === "object" && data.public_card) {
+    return data.public_card;
+  }
+  return data || {};
+}
+
+function statusLabel(code) {
+  const map = {
+    active: "Active",
+    suspended: "Suspended",
+    archived: "Archived",
+    replaced: "Replaced"
+  };
+  return map[(code || "").toLowerCase()] || "";
+}
+
+function statusMessage(code) {
+  const map = {
+    active: "This passport is active.",
+    suspended: "This passport is currently suspended.",
+    archived: "This passport is archived.",
+    replaced: "This passport has been replaced."
+  };
+  return map[(code || "").toLowerCase()] || "";
+}
+
+function renderStatusBanner(meta) {
+  const banner = document.getElementById("statusBanner");
+  const code = String(meta.status || "").trim().toLowerCase();
+  banner.className = "status-banner";
+  banner.textContent = "";
+  if (!code) {
+    banner.style.display = "none";
+    return;
+  }
+  const label = statusLabel(code);
+  const message = statusMessage(code);
+  if (!label) {
+    banner.style.display = "none";
+    return;
+  }
+  banner.classList.add("status-" + code);
+  banner.textContent = message ? `${label} · ${message}` : label;
+  banner.style.display = "block";
+}
+
+function renderTextBlock(title, content) {
+  if (!content.length) return "";
+  return `<div class="block"><b>${esc(title)}</b>${content.map(x => esc(x)).join("<br>")}</div>`;
+}
+
+function renderListBlock(title, content) {
+  if (!content.length) return "";
+  let html = `<div class="block"><b>${esc(title)}</b><ul>`;
+  content.forEach(i => {
+    html += `<li>${esc(i)}</li>`;
+  });
+  html += `</ul></div>`;
+  return html;
+}
+
+function renderLinksBlock(title, content) {
+  if (!content.length) return "";
+  let html = `<div class="block"><b>${esc(title)}</b><ul class="link-list">`;
+  content.forEach(i => {
+    const label = esc(i.label || "");
+    const text = esc(i.text || "");
+    const href = normalizeHref(i.href || "");
+    const line = label ? `${label}: ${text}` : text;
+    if (href) {
+      html += `<li><a href="${esc(href)}" target="_blank" rel="noopener noreferrer">${line}</a></li>`;
+    } else {
+      html += `<li>${line}</li>`;
     }
+  });
+  html += `</ul></div>`;
+  return html;
+}
 
-    function getArray(v) {
-      return Array.isArray(v) ? v : [];
+function renderFilesBlock(title, content) {
+  if (!content.length) return "";
+  let html = `<div class="block"><b>${esc(title)}</b><ul class="link-list">`;
+  content.forEach(file => {
+    const name = esc(file.name || file.path || "File");
+    const path = file.path ? `${ITEMS_BASE}/${encodeURIComponent(item)}/${encodeURIComponent(file.path)}` : "";
+    if (path) {
+      html += `<li><a href="${path}" target="_blank" rel="noopener noreferrer">${name}</a></li>`;
+    } else {
+      html += `<li>${name}</li>`;
     }
+  });
+  html += `</ul></div>`;
+  return html;
+}
 
-    function getText(v) {
-      if (v == null) return "";
-      if (typeof v === "string") return v;
-      return String(v);
+function hasValue(v) {
+  return !(v === undefined || v === null || String(v).trim() === "");
+}
+
+function passportEntries(meta, publicCard, fallbackData) {
+  return [
+    ["Internal ID", meta.internal_id],
+    ["Passport Type", meta.passport_type],
+    ["Status", meta.status],
+    ["Version", meta.version],
+    ["Product Name", meta.product_name || publicCard.title || fallbackData.title],
+    ["Batch ID", meta.batch_id],
+    ["Serial ID", meta.serial_id],
+    ["Verification Code", meta.verification_code],
+    ["Created At", meta.created_at],
+    ["Updated At", meta.updated_at]
+  ].filter(([_, value]) => hasValue(value));
+}
+
+function renderPassportBlock(meta, publicCard, fallbackData) {
+  const entries = passportEntries(meta, publicCard, fallbackData);
+  if (!entries.length) return "";
+  let html = `<div class="block"><b>Product Passport</b><div class="passport-grid">`;
+  entries.forEach(([label, value]) => {
+    html += `<div class="passport-row"><span class="passport-label">${esc(label)}</span><span class="passport-value">${esc(value)}</span></div>`;
+  });
+  html += `</div></div>`;
+  return html;
+}
+
+function renderCard() {
+  if (!currentData) return;
+
+  const meta = getPassportMeta(currentData);
+  const publicCard = getPublicCard(currentData);
+
+  document.getElementById("title").innerText =
+    getText(meta.product_name) || getText(publicCard.title) || getText(currentData.title) || "Product Passport";
+
+  renderStatusBanner(meta);
+
+  const img = document.getElementById("photo");
+  const imageName = publicCard.image || currentData.image;
+  if (imageName) {
+    img.src = `${ITEMS_BASE}/${encodeURIComponent(item)}/${encodeURIComponent(imageName)}?v=${Date.now()}`;
+    img.style.display = "block";
+  } else {
+    img.removeAttribute("src");
+    img.style.display = "none";
+  }
+
+  let html = "";
+  html += renderPassportBlock(meta, publicCard, currentData);
+
+  (publicCard.sections || currentData.sections || []).forEach(section => {
+    if (section.hide === true) return;
+
+    let title = getText(section.title);
+    const type = section.type;
+    const content = getArray(section.content);
+
+    if (type === "text") {
+      title = "Description";
+      html += renderTextBlock(title, content);
+    } else if (type === "list") {
+      html += renderListBlock(title || "List", content);
+    } else if (type === "links") {
+      title = "Contacts";
+      const normalizedContent = content.map(i => ({
+        ...i,
+        label:
+          i.kind === "phone" ? "Phone" :
+          i.kind === "email" ? "Email" :
+          i.kind === "whatsapp" ? "WhatsApp" :
+          i.kind === "website" ? "Website" :
+          (i.label === "Телефон" ? "Phone" :
+           i.label === "Сайт" ? "Website" :
+           i.label || "")
+      }));
+      html += renderLinksBlock(title, normalizedContent);
+    } else if (type === "files") {
+      title = "Files";
+      html += renderFilesBlock(title, content);
     }
+  });
 
-    function getPassportMeta(data) {
-      if (data && typeof data.passport_meta === "object" && data.passport_meta) {
-        return data.passport_meta;
-      }
-      return data || {};
-    }
+  document.getElementById("content").innerHTML = html || "<div class='block'>No data</div>";
+}
 
-    function getPublicCard(data) {
-      if (data && typeof data.public_card === "object" && data.public_card) {
-        return data.public_card;
-      }
-      return data || {};
-    }
+if (!item) {
+  document.getElementById("error").innerText =
+    "Missing item parameter
+Example: ?item=spring-001";
+} else {
+  const dataUrl = `${ITEMS_BASE}/${encodeURIComponent(item)}/data.json?v=${Date.now()}`;
 
-    function statusLabel(code) {
-      const map = {
-        active: "Active",
-        suspended: "Suspended",
-        archived: "Archived",
-        replaced: "Replaced"
-      };
-      return map[(code || "").toLowerCase()] || "Unknown";
-    }
-
-    function statusMessage(code) {
-      const map = {
-        active: "This passport is active.",
-        suspended: "This passport is currently suspended.",
-        archived: "This passport is archived.",
-        replaced: "This passport has been replaced."
-      };
-      return map[(code || "").toLowerCase()] || "Status is not specified.";
-    }
-
-    function renderStatusBanner(meta) {
-      const banner = document.getElementById("statusBanner");
-      const code = (meta.status || "").toLowerCase().trim();
-      banner.className = "status-banner";
-      if (!code) {
-        banner.style.display = "none";
-        banner.textContent = "";
-        return;
-      }
-      banner.classList.add(code);
-      banner.textContent = `${statusLabel(code)} · ${statusMessage(code)}`;
-      banner.style.display = "block";
-    }
-
-    function setMetaValue(id, value) {
-      const el = document.getElementById(id);
-      el.textContent = value ? String(value) : "—";
-    }
-
-    function renderPassportMeta(meta) {
-      const box = document.getElementById("passportMeta");
-      const hasAny = [
-        meta.status,
-        meta.version,
-        meta.batch_id,
-        meta.serial_id,
-        meta.verification_code,
-        meta.updated_at
-      ].some(v => String(v || "").trim() !== "");
-
-      if (!hasAny) {
-        box.style.display = "none";
-        return;
-      }
-
-      setMetaValue("metaStatus", statusLabel(meta.status || ""));
-      setMetaValue("metaVersion", meta.version);
-      setMetaValue("metaBatch", meta.batch_id);
-      setMetaValue("metaSerial", meta.serial_id);
-      setMetaValue("metaVerification", meta.verification_code);
-      setMetaValue("metaUpdated", meta.updated_at);
-      box.style.display = "grid";
-    }
-
-    function renderTextBlock(title, content) {
-      const lines = getArray(content)
-        .map(v => getText(v))
-        .filter(Boolean);
-
-      if (!lines.length) return "";
-      return `
-        <div class="block">
-          <div class="block-title">${esc(title)}</div>
-          <div class="text-lines">${esc(lines.join("\n"))}</div>
-        </div>
-      `;
-    }
-
-    function renderListBlock(title, content) {
-      const lines = getArray(content)
-        .map(v => getText(v))
-        .filter(Boolean);
-      if (!lines.length) return "";
-      const items = lines.map(v => `<li>${esc(v)}</li>`).join("");
-      return `
-        <div class="block">
-          <div class="block-title">${esc(title)}</div>
-          <ul class="plain-list">${items}</ul>
-        </div>
-      `;
-    }
-
-    function renderLinksBlock(title, content) {
-      const items = getArray(content);
-      if (!items.length) return "";
-      const html = items.map(item => {
-        const label =
-          item.kind === "phone" ? "Phone" :
-          item.kind === "email" ? "Email" :
-          item.kind === "whatsapp" ? "WhatsApp" :
-          item.kind === "website" ? "Website" :
-          (item.label === "Телефон" ? "Phone" :
-           item.label === "Сайт" ? "Website" :
-           item.label || "");
-
-        const text = item.text || "";
-        const href = item.href || "";
-        if (href) {
-          return `<li><b>${esc(label)}:</b> <a href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(text)}</a></li>`;
-        }
-        return `<li><b>${esc(label)}:</b> ${esc(text)}</li>`;
-      }).join("");
-
-      return `
-        <div class="block">
-          <div class="block-title">${esc(title)}</div>
-          <ul class="link-list">${html}</ul>
-        </div>
-      `;
-    }
-
-    function renderFilesBlock(title, content) {
-      const files = getArray(content);
-      if (!files.length) return "";
-      let html = `<div class="block"><div class="block-title">${esc(title)}</div><ul class="link-list">`;
-      files.forEach(file => {
-        const name = esc(file.name || file.path || "File");
-        const path = file.path ? `${ITEMS_BASE}/${encodeURIComponent(item)}/${encodeURIComponent(file.path)}` : "";
-        if (path) {
-          html += `<li><a href="${path}" target="_blank" rel="noopener noreferrer">${name}</a></li>`;
-        } else {
-          html += `<li>${name}</li>`;
-        }
-      });
-      html += `</ul></div>`;
-      return html;
-    }
-
-    function renderCard() {
-      if (!currentData) return;
-
-      const meta = getPassportMeta(currentData);
-      const card = getPublicCard(currentData);
-
-      document.getElementById("title").innerText = getText(card.title || currentData.title) || "Passport";
-
-      renderStatusBanner(meta);
-      renderPassportMeta(meta);
-
-      const img = document.getElementById("photo");
-      const imageName = card.image || currentData.image;
-      if (imageName) {
-        img.src = `${ITEMS_BASE}/${encodeURIComponent(item)}/${encodeURIComponent(imageName)}?v=${Date.now()}`;
-        img.style.display = "block";
-      } else {
-        img.removeAttribute("src");
-        img.style.display = "none";
-      }
-
-      let html = "";
-      const sections = getArray(card.sections || currentData.sections);
-
-      sections.forEach(section => {
-        if (section.hide === true) return;
-
-        let title = getText(section.title);
-        const type = section.type;
-        const content = getArray(section.content);
-
-        if (type === "text") {
-          title = "Description";
-          html += renderTextBlock(title, content);
-        } else if (type === "list") {
-          html += renderListBlock(title || "List", content);
-        } else if (type === "links") {
-          title = "Contacts";
-          html += renderLinksBlock(title, content);
-        } else if (type === "files") {
-          title = "Files";
-          html += renderFilesBlock(title, content);
-        }
-      });
-
-      document.getElementById("content").innerHTML = html || "<div class='block empty'>No public data</div>";
-    }
-
-    if (!item) {
+  fetch(dataUrl, { cache: "no-store" })
+    .then(res => {
+      if (!res.ok) throw new Error("data.json not found");
+      return res.json();
+    })
+    .then(data => {
+      currentData = data;
+      renderCard();
+    })
+    .catch(err => {
       document.getElementById("title").innerText = "Error";
       document.getElementById("error").innerText =
-        "Missing item parameter\nExample: ?item=your-public-token";
-    } else {
-      const dataUrl = `${ITEMS_BASE}/${encodeURIComponent(item)}/data.json?v=${Date.now()}`;
-
-      fetch(dataUrl, { cache: "no-store" })
-        .then(res => {
-          if (!res.ok) throw new Error("data.json not found");
-          return res.json();
-        })
-        .then(data => {
-          currentData = data;
-          renderCard();
-        })
-        .catch(err => {
-          document.getElementById("title").innerText = "Error";
-          document.getElementById("error").innerText = "Loading error: " + err.message;
-        });
-    }
-  </script>
+        "Loading error: " + err.message;
+    });
+}
+</script>
 </body>
 </html>
