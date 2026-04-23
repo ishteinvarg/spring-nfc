@@ -9,9 +9,18 @@
   "serial_id": "0001",
   "verification_code": "9CE6-F9FD",
   "created_at": "2026-04-23T12:04:29",
-  "updated_at": "2026-04-23T18:11:23",
+  "updated_at": "2026-04-23T18:26:53",
   "title": "Igor Shteinvarg",
-  "image": "SAM_0055_1_optimized_optimized_optimized_optimized_optimized.jpg",
+  "image": "SAM_0055_1_optimized_optimized_optimized_optimized_optimized_optimized.jpg",
+  "editor_note": "Привет, Я Игорь",
+  "change_log": [
+    {
+      "changed_at": "2026-04-23T18:26:17",
+      "version": 1,
+      "changed_fields": [],
+      "note": "Привет, Я Игорь"
+    }
+  ],
   "sections": [
     {
       "type": "text",
