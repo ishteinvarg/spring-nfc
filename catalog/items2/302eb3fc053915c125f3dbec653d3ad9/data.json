@@ -1,0 +1,66 @@
+{
+  "internal_id": "ID_0001",
+  "public_token": "302eb3fc053915c125f3dbec653d3ad9",
+  "passport_type": "product_passport",
+  "status": "active",
+  "version": 1,
+  "product_name": "Igor Shteinvarg",
+  "batch_id": "",
+  "serial_id": "",
+  "verification_code": "9CE6-F9FD",
+  "created_at": "2026-04-23T12:04:29",
+  "updated_at": "2026-04-23T12:04:45",
+  "title": "Igor Shteinvarg",
+  "image": "SAM_0055_1_optimized.jpg",
+  "sections": [
+    {
+      "type": "text",
+      "title": "Описание",
+      "content": [
+        "[Файл: Igor_.docx]",
+        "IGOR SHTEINVAR(G)",
+        "Engineer / Technical Specialist",
+        "Israel",
+        "PROFESSIONAL SUMMARY",
+        "Engineer with a classical technical education and extensive hands‑on experience in hardware systems, network infrastructure, industrial equipment, and complex technical troubleshooting. Strong analytical mindset, systematic approach, and proven root cause analysis skills.",
+        "Currently expanding professional expertise through QA testing studies and applied neural network training.",
+        "CORE SKILLS",
+        "• Hardware and software troubleshooting",
+        "• Network infrastructure and technologies",
+        "• Industrial and measuring equipment",
+        "• Technical documentation analysis",
+        "• Root cause analysis",
+        "• Windows and Linux systems"
+      ]
+    },
+    {
+      "type": "links",
+      "title": "Контакты",
+      "content": [
+        {
+          "kind": "email",
+          "label": "Email",
+          "text": "ishteinvarg@gmail.com",
+          "href": "mailto:ishteinvarg@gmail.com"
+        },
+        {
+          "kind": "whatsapp",
+          "label": "WhatsApp",
+          "text": "0553162024",
+          "href": "https://wa.me/0553162024"
+        }
+      ]
+    },
+    {
+      "type": "files",
+      "title": "Файлы",
+      "content": [
+        {
+          "name": "Igor_.docx",
+          "path": "Igor_.docx",
+          "type": "docx"
+        }
+      ]
+    }
+  ]
+}
