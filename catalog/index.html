@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Card</title>
+  <title>Product Passport</title>
   <style>
     body {
       margin: 0;
@@ -66,13 +66,47 @@
       font-weight: bold;
       white-space: pre-line;
     }
+    .passport-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .passport-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      line-height: 1.35;
+    }
+    .passport-label {
+      min-width: 150px;
+      font-weight: bold;
+      color: #111827;
+    }
+    .passport-value {
+      color: #374151;
+      word-break: break-word;
+    }
+    @media (min-width: 640px) {
+      .passport-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 18px;
+      }
+      .passport-row {
+        display: block;
+      }
+      .passport-label {
+        display: block;
+        min-width: 0;
+        margin-bottom: 2px;
+      }
+    }
   </style>
 </head>
 <body>
 <div class="container">
   <div class="card">
-    <h1 id="title">Загрузка...</h1>
-    <img id="photo" alt="Изображение">
+    <h1 id="title">Loading...</h1>
+    <img id="photo" alt="Image">
     <div id="content"></div>
     <div id="error" class="error"></div>
   </div>
@@ -170,10 +204,40 @@ function renderFilesBlock(title, content) {
   return html;
 }
 
+function hasValue(v) {
+  return !(v === undefined || v === null || String(v).trim() === "");
+}
+
+function passportEntries(data) {
+  return [
+    ["Internal ID", data.internal_id],
+    ["Passport Type", data.passport_type],
+    ["Status", data.status],
+    ["Version", data.version],
+    ["Product Name", data.product_name || data.title],
+    ["Batch ID", data.batch_id],
+    ["Serial ID", data.serial_id],
+    ["Verification Code", data.verification_code],
+    ["Created At", data.created_at],
+    ["Updated At", data.updated_at]
+  ].filter(([_, value]) => hasValue(value));
+}
+
+function renderPassportBlock(data) {
+  const entries = passportEntries(data);
+  if (!entries.length) return "";
+  let html = `<div class="block"><b>Product Passport</b><div class="passport-grid">`;
+  entries.forEach(([label, value]) => {
+    html += `<div class="passport-row"><span class="passport-label">${esc(label)}</span><span class="passport-value">${esc(value)}</span></div>`;
+  });
+  html += `</div></div>`;
+  return html;
+}
+
 function renderCard() {
   if (!currentData) return;
 
-  document.getElementById("title").innerText = getText(currentData.title) || "Card";
+  document.getElementById("title").innerText = getText(currentData.product_name) || getText(currentData.title) || "Product Passport";
 
   const img = document.getElementById("photo");
   if (currentData.image) {
@@ -185,6 +249,7 @@ function renderCard() {
   }
 
   let html = "";
+  html += renderPassportBlock(currentData);
 
   (currentData.sections || []).forEach(section => {
     if (section.hide === true) return;
