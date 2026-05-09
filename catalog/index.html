@@ -66,6 +66,40 @@
       font-weight: bold;
       white-space: pre-line;
     }
+    .status-banner {
+      display: none;
+      margin-bottom: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: bold;
+      line-height: 1.35;
+      border: 1px solid transparent;
+    }
+    .status-active {
+      display: block;
+      background: #ecfdf5;
+      color: #065f46;
+      border-color: #a7f3d0;
+    }
+    .status-suspended {
+      display: block;
+      background: #fffbeb;
+      color: #92400e;
+      border-color: #fde68a;
+    }
+    .status-archived {
+      display: block;
+      background: #f3f4f6;
+      color: #374151;
+      border-color: #d1d5db;
+    }
+    .status-replaced {
+      display: block;
+      background: #fef2f2;
+      color: #991b1b;
+      border-color: #fecaca;
+    }
     .passport-block {
       padding: 10px 12px;
       background: #f6f7f9;
@@ -109,6 +143,7 @@
 <body>
 <div class="container">
   <div class="card">
+    <div id="statusBanner" class="status-banner"></div>
     <h1 id="title">Loading...</h1>
     <img id="photo" alt="Image">
     <div id="content"></div>
@@ -225,6 +260,53 @@ function passportEntries(data) {
   ].filter(([_, value]) => hasValue(value));
 }
 
+function statusLabel(status) {
+  const value = String(status || "").trim().toLowerCase();
+  const labels = {
+    active: "Active",
+    suspended: "Suspended",
+    archived: "Archived",
+    replaced: "Replaced"
+  };
+  return labels[value] || "";
+}
+
+function statusMessage(status) {
+  const value = String(status || "").trim().toLowerCase();
+  const messages = {
+    active: "This product passport is active.",
+    suspended: "This product passport is currently suspended.",
+    archived: "This product passport is archived.",
+    replaced: "This product passport has been replaced."
+  };
+  return messages[value] || "";
+}
+
+function renderStatusBanner(data) {
+  const banner = document.getElementById("statusBanner");
+  if (!banner) return;
+
+  const value = String((data && data.status) || "").trim().toLowerCase();
+  banner.className = "status-banner";
+  banner.textContent = "";
+
+  if (!value) {
+    banner.style.display = "none";
+    return;
+  }
+
+  const label = statusLabel(value);
+  if (!label) {
+    banner.style.display = "none";
+    return;
+  }
+
+  const message = statusMessage(value);
+  banner.classList.add("status-" + value);
+  banner.textContent = message ? `${label} · ${message}` : label;
+  banner.style.display = "block";
+}
+
 function renderPassportBlock(data) {
   const entries = passportEntries(data);
   if (!entries.length) return "";
@@ -240,6 +322,7 @@ function renderCard() {
   if (!currentData) return;
 
   document.getElementById("title").innerText = getText(currentData.product_name) || getText(currentData.title) || "Product Passport";
+  renderStatusBanner(currentData);
 
   const img = document.getElementById("photo");
   if (currentData.image) {
