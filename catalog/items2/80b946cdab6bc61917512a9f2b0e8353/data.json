@@ -9,7 +9,7 @@
   "serial_id": "0004",
   "verification_code": "CC78-D494",
   "created_at": "2026-05-09T14:37:38",
-  "updated_at": "2026-05-09T16:21:22",
+  "updated_at": "2026-05-09T16:34:50",
   "title": "Igor Shteinvarg",
   "image": "SAM_0055_1_optimized_optimized_optimized_optimized_optimized_optimized_optimized_optimized_optimized.jpg",
   "editor_note": "Создано копированием из ID_0003",
@@ -116,11 +116,6 @@
           "name": "Igor_.docx",
           "path": "Igor_.docx",
           "type": "docx"
-        },
-        {
-          "name": "навыки 1.docx",
-          "path": "навыки 1.docx",
-          "type": "docx"
         }
       ]
     }
@@ -137,7 +132,7 @@
     "serial_id": "0004",
     "verification_code": "CC78-D494",
     "created_at": "2026-05-09T14:37:38",
-    "updated_at": "2026-05-09T16:21:22"
+    "updated_at": "2026-05-09T16:34:50"
   },
   "private_meta": {
     "editor_note": "Создано копированием из ID_0003",
@@ -247,11 +242,6 @@
           {
             "name": "Igor_.docx",
             "path": "Igor_.docx",
-            "type": "docx"
-          },
-          {
-            "name": "навыки 1.docx",
-            "path": "навыки 1.docx",
             "type": "docx"
           }
         ]
