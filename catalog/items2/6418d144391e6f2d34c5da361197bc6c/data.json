@@ -1,0 +1,18 @@
+{
+  "internal_id": "artist-001",
+  "public_token": "6418d144391e6f2d34c5da361197bc6c",
+  "passport_type": "product_passport",
+  "status": "active",
+  "version": 1,
+  "product_name": "artist-001",
+  "batch_id": "",
+  "serial_id": "",
+  "verification_code": "E363-B268",
+  "created_at": "2026-05-10T13:45:48",
+  "updated_at": "2026-05-11T14:50:10",
+  "title": "",
+  "image": null,
+  "editor_note": "",
+  "change_log": [],
+  "sections": []
+}
